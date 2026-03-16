@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego de Memoria Visual</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #e9d5ff 0%, #dbeafe 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .title-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: #1f2937;
+        }
+
+        .icon {
+            width: 40px;
+            height: 40px;
+            color: #9333ea;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            font-size: 1.1rem;
+        }
+
+        .stat-box {
+            background: white;
+            padding: 1rem 2rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-label {
+            font-weight: 600;
+            color: #9333ea;
+        }
+
+        .game-box {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .game-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            color: #1f2937;
+        }
+
+        .game-subtitle {
+            font-size: 1.1rem;
+            color: #6b7280;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .timer {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #1f2937;
+            margin: 1rem 0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 0.5rem;
+            max-width: 500px;
+            margin: 2rem auto;
+        }
+
+        .cell {
+            aspect-ratio: 1;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #e5e7eb;
+        }
+
+        .cell:hover:not(:disabled) {
+            background: #d1d5db;
+            transform: scale(1.05);
+        }
+
+        .cell.memorize {
+            background: #3b82f6;
+            animation: pulse 1s infinite;
+        }
+
+        .cell.selected {
+            background: #22c55e;
+        }
+
+        .cell.correct {
+            background: #22c55e;
+        }
+
+        .cell.missed {
+            background: #ef4444;
+        }
+
+        .cell.wrong {
+            background: #f97316;
+        }
+
+        .cell:disabled {
+            cursor: default;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-primary {
+            background: #9333ea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #7e22ce;
+        }
+
+        .btn-success {
+            background: #22c55e;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #16a34a;
+        }
+
+        .btn-info {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-info:hover {
+            background: #2563eb;
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .legend {
+            color: #6b7280;
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="title-container">
+                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                </svg>
+                <h1>Memoria Visual</h1>
+            </div>
+            <div class="stats">
+                <div class="stat-box">
+                    <span class="stat-label">Nivel:</span> <span id="level">1</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">Puntos:</span> <span id="score">0</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="startScreen" class="game-box">
+            <h2 class="game-title">¡Bienvenido!</h2>
+            <p class="game-subtitle">
+                Memoriza las posiciones de los cuadrados azules en 3 segundos.<br>
+                Luego, intenta marcar los mismos cuadrados que viste.
+            </p>
+            <button class="btn btn-primary" onclick="startGame()">
+                ▶ Comenzar
+            </button>
+        </div>
+
+        <div id="memorizeScreen" class="game-box hidden">
+            <h2 class="game-title" style="color: #3b82f6;">¡Memoriza!</h2>
+            <div class="timer" id="timer">3</div>
+            <div class="grid" id="memorizeGrid"></div>
+        </div>
+
+        <div id="playScreen" class="game-box hidden">
+            <h2 class="game-title" style="color: #22c55e;">Tu turno</h2>
+            <p class="game-subtitle">Marca los cuadrados que recuerdes (<span id="cellsToMark">8</span> en total)</p>
+            <div class="grid" id="playGrid"></div>
+            <button class="btn btn-success" onclick="checkAnswer()">Verificar</button>
+        </div>
+
+        <div id="resultScreen" class="game-box hidden">
+            <h2 class="game-title" id="resultTitle">¡Excelente! 🎉</h2>
+            <p class="legend">Verde = Correcto | Rojo = Olvidaste | Naranja = Incorrecto</p>
+            <div class="grid" id="resultGrid"></div>
+            <div class="button-group">
+                <button class="btn btn-primary" id="nextBtn" onclick="startGame()">Siguiente Nivel</button>
+                <button class="btn btn-info" id="retryBtn" onclick="startGame()" class="hidden">Intentar de Nuevo</button>
+                <button class="btn btn-secondary" onclick="reset()">↻ Reiniciar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let level = 1;
+        let score = 0;
+        let pattern = [];
+        let userSelection = [];
+        let timeLeft = 3;
+        let timerInterval;
+
+        const GRID_SIZE = 30;
+        const COLS = 6;
+
+        function getCellsToMark() {
+            return Math.min(7 + level, 15);
+        }
+
+        function generatePattern() {
+            const cellsToMark = getCellsToMark();
+            const positions = new Set();
+            while (positions.size < cellsToMark) {
+                positions.add(Math.floor(Math.random() * GRID_SIZE));
+            }
+            return Array.from(positions);
+        }
+
+        function showScreen(screenId) {
+            const screens = ['startScreen', 'memorizeScreen', 'playScreen', 'resultScreen'];
+            screens.forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(screenId).classList.remove('hidden');
+        }
+
+        function createGrid(gridId, clickable) {
+            const grid = document.getElementById(gridId);
+            grid.innerHTML = '';
+            
+            for (let i = 0; i < GRID_SIZE; i++) {
+                const cell = document.createElement('button');
+                cell.className = 'cell';
+                cell.dataset.index = i;
+                
+                if (clickable) {
+                    cell.onclick = function() { toggleCell(i); };
+                } else {
+                    cell.disabled = true;
+                }
+                
+                grid.appendChild(cell);
+            }
+        }
+
+        function startGame() {
+            pattern = generatePattern();
+            userSelection = [];
+            timeLeft = 3;
+            
+            document.getElementById('cellsToMark').textContent = getCellsToMark();
+            
+            showScreen('memorizeScreen');
+            createGrid('memorizeGrid', false);
+            
+            pattern.forEach(function(index) {
+                const cells = document.querySelectorAll('#memorizeGrid .cell');
+                cells[index].classList.add('memorize');
+            });
+            
+            document.getElementById('timer').textContent = timeLeft;
+            
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+            
+            timerInterval = setInterval(function() {
+                timeLeft--;
+                document.getElementById('timer').textContent = timeLeft;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    showPlayScreen();
+                }
+            }, 1000);
+        }
+
+        function showPlayScreen() {
+            showScreen('playScreen');
+            createGrid('playGrid', true);
+        }
+
+        function toggleCell(index) {
+            const cells = document.querySelectorAll('#playGrid .cell');
+            const cell = cells[index];
+            
+            const idx = userSelection.indexOf(index);
+            if (idx > -1) {
+                userSelection.splice(idx, 1);
+                cell.classList.remove('selected');
+            } else {
+                userSelection.push(index);
+                cell.classList.add('selected');
+            }
+        }
+
+        function checkAnswer() {
+            const allPatternInSelection = pattern.every(function(i) {
+                return userSelection.indexOf(i) > -1;
+            });
+            
+            const allSelectionInPattern = userSelection.every(function(i) {
+                return pattern.indexOf(i) > -1;
+            });
+            
+            const correct = allPatternInSelection && allSelectionInPattern;
+            
+            showScreen('resultScreen');
+            createGrid('resultGrid', false);
+            
+            const resultCells = document.querySelectorAll('#resultGrid .cell');
+            
+            for (let i = 0; i < GRID_SIZE; i++) {
+                const cell = resultCells[i];
+                const inPattern = pattern.indexOf(i) > -1;
+                const inSelection = userSelection.indexOf(i) > -1;
+                
+                if (inPattern && inSelection) {
+                    cell.classList.add('correct');
+                } else if (inPattern && !inSelection) {
+                    cell.classList.add('missed');
+                } else if (!inPattern && inSelection) {
+                    cell.classList.add('wrong');
+                }
+            }
+            
+            if (correct) {
+                score += level * 10;
+                level++;
+                document.getElementById('resultTitle').textContent = '¡Excelente! 🎉';
+                document.getElementById('nextBtn').classList.remove('hidden');
+                document.getElementById('retryBtn').classList.add('hidden');
+            } else {
+                document.getElementById('resultTitle').textContent = 'Casi lo logras';
+                document.getElementById('nextBtn').classList.add('hidden');
+                document.getElementById('retryBtn').classList.remove('hidden');
+            }
+            
+            updateStats();
+        }
+
+        function reset() {
+            level = 1;
+            score = 0;
+            pattern = [];
+            userSelection = [];
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+            updateStats();
+            showScreen('startScreen');
+        }
+
+        function updateStats() {
+            document.getElementById('level').textContent = level;
+            document.getElementById('score').textContent = score;
+        }
+
+        updateStats();
+    </script>
+</body>
+</html>
