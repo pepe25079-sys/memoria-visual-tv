@@ -1,0 +1,8 @@
+{
+  "appId": "com.juego.memoriavisual",
+  "appName": "Memoria Visual",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": true
+  }
+}
