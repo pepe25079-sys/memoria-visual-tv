@@ -15,7 +15,7 @@ jobs:
           node-version: '18'
       - uses: actions/setup-java@v4
         with:
-          java-version: '21'
+          java-version: '17'
           distribution: 'temurin'
       - name: Clean caches
         run: |
@@ -26,11 +26,15 @@ jobs:
           npm install @capacitor/core @capacitor/cli @capacitor/android
           npx cap add android
           npx cap copy
+      - name: Update Gradle version
+        run: |
+          cd android
+          ./gradlew wrapper --gradle-version=8.9 --distribution-type=all
       - name: Compile APK
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon --stacktrace
+          ./gradlew assembleDebug --no-daemon
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
