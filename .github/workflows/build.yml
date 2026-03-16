@@ -1,7 +1,10 @@
+
 name: Build APK
 on:
   push:
     branches: [ main ]
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -14,6 +17,8 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+      - name: Clean Gradle cache
+        run: rm -rf ~/.gradle/caches
       - name: Install dependencies
         run: |
           npm install @capacitor/core @capacitor/cli @capacitor/android
@@ -23,7 +28,7 @@ jobs:
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug
+          ./gradlew assembleDebug --no-daemon
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
